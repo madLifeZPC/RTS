@@ -19,15 +19,15 @@ public class TLSStep {
     
     private int period;
     private List< List<Task> > localSteps;
-    private double[] localIdleRates;
+    private double[] localload;
 
     public TLSStep(int period) {
         this.period = period;
         this.localSteps = new ArrayList<>();
-        this.localIdleRates = new double[period/Main.TIME_STEP];
+        this.localload = new double[period/Main.TIME_STEP];
         for( int i=0;i< (period/Main.TIME_STEP);i++ ){
             localSteps.add( new LinkedList<>() );
-            localIdleRates[i] = 1.0;
+            localload[i] = 0;
         }
         
     }
@@ -48,12 +48,12 @@ public class TLSStep {
         this.period = period;
     }
 
-    public double[] getLocalIdleRates() {
-        return localIdleRates;
+    public double[] getLocalload() {
+        return localload;
     }
 
-    public void setLocalIdleRates(double[] localIdleRates) {
-        this.localIdleRates = localIdleRates;
+    public void setLocalload(double[] localload) {
+        this.localload = localload;
     }
     
 }
