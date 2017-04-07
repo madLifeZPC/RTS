@@ -11,7 +11,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import rts.Main;
+import static rts.Main.NUMBER_OF_NON_SCHEDULABLE_TASK;
 import rts.exception.CannotScheduleException;
 import rts.task.Task;
 
@@ -67,7 +70,7 @@ public class TLSScheduler {
      * Generate the schedule table based on all the tasks known before execution.
      * @throws CannotScheduleException 
      */
-    private void generateInitialTable() throws CannotScheduleException {
+    private void generateInitialTable(){
 
         List<Integer> periods = new ArrayList<>(classifiedTasks.keySet());
         Collections.sort(periods);
@@ -78,7 +81,11 @@ public class TLSScheduler {
                 return (int) (o1.getModel().getComputationTime() - o2.getModel().getComputationTime());
             });
             for (Task task : tasksWithSamePeriod) {
-                insertTask(task);
+                try {
+                    insertTask(task);
+                } catch (CannotScheduleException ex) {
+                    Main.NUMBER_OF_NON_SCHEDULABLE_TASK++;
+                }
             }
         }
 
@@ -95,7 +102,8 @@ public class TLSScheduler {
         }
 
         IndexEntry result;
-        while ((result = checkBalanced(step)) != null) {
+        int rebanlanceCounter = 0;
+        while ( (result = checkBalanced(step)) != null && rebanlanceCounter<10 ) {
             int minIndex = result.getMinIndex(), maxIndex = result.getMaxIndex();
 
             // Find the last element in max.
@@ -120,6 +128,7 @@ public class TLSScheduler {
             }
             
             Main.NUMBER_OF_JITTER++;
+            rebanlanceCounter++;
         }
 
     }
@@ -216,6 +225,8 @@ public class TLSScheduler {
                 throw new CannotScheduleException();
             }
         }
+        
+        rebalanceTable(belongedStep);
     }
     
     private class Memento{

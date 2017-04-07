@@ -37,7 +37,7 @@ public class Main {
     // Result statitics.
     public static int NUMBER_OF_NON_SCHEDULABLE_TASK = 0;
     public static int NUMBER_OF_JITTER = 0;
-    public static long OVERHEAD = 0;
+    public static double OVERHEAD = 0;
 
     /**
      * @param args the command line arguments
@@ -67,23 +67,25 @@ public class Main {
                         if (add) {
                             if (addCounter < NUMBER_OF_ADDED) {
                                 List<Task> tasks = TaskFactory.generateTasks(1, models);
-                                long beforeAlgo = System.currentTimeMillis();
+                                long beforeAlgo = System.nanoTime();
                                 try {
                                     scheduler.insertTask(tasks.get(0));
                                 } catch (CannotScheduleException ex) {
                                     NUMBER_OF_NON_SCHEDULABLE_TASK++;
                                 }
-                                OVERHEAD += (System.currentTimeMillis() - beforeAlgo);
+                                OVERHEAD += ((double)System.nanoTime() - (double)beforeAlgo)/1000000;
                                 addCounter++;
                             }
                             add = false;
                         } else {
-                            long beforeAlgo = System.currentTimeMillis();
+                            long beforeAlgo = System.nanoTime();
                             if (deleteCounter < NUMBER_OF_DESTROYED) {
-                                scheduler.deleteTask(initialTask.get(deleteCounter));
-                                deleteCounter++;
+                                if (deleteCounter < initialTask.size()) {
+                                    scheduler.deleteTask(initialTask.get(deleteCounter));
+                                    deleteCounter++;
+                                }
                             }
-                            OVERHEAD += (System.currentTimeMillis() - beforeAlgo);
+                            OVERHEAD += ((double)System.nanoTime() - (double)beforeAlgo)/1000000;
                             add = true;
                         }
                         try {
@@ -96,9 +98,9 @@ public class Main {
 
                     // Simulation done, output result.
                     List<String> data = new ArrayList<>();
-                    data.add("NUMBER_OF_NON_SCHEDULABLE_TASK:"+NUMBER_OF_NON_SCHEDULABLE_TASK);
-                    data.add("NUMBER_OF_JITTER:"+NUMBER_OF_JITTER);
-                    data.add("OVERHEAD:"+OVERHEAD);
+                    data.add("NUMBER_OF_NON_SCHEDULABLE_TASK:" + NUMBER_OF_NON_SCHEDULABLE_TASK);
+                    data.add("NUMBER_OF_JITTER:" + NUMBER_OF_JITTER);
+                    data.add("OVERHEAD:" + OVERHEAD);
                     outputResult(data);
                 }
             };
@@ -112,7 +114,7 @@ public class Main {
 
     }
 
-    public static void outputResult( List<String> data ) {
+    public static void outputResult(List<String> data) {
         Path filePath = Paths.get("result", "result.txt");
         FileWriter fileWriter = null;
         PrintWriter printWriter = null;
